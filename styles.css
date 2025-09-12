@@ -1,83 +1,153 @@
 /* --- 共通 --- */
-body { 
-  font-family: sans-serif; 
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  min-height: 100vh; 
-  padding: 20px; 
+body {
+  font-family: sans-serif;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
   box-sizing: border-box;
+  margin: 0;
 }
+
 .title {
   margin-bottom: 30px;
-  font-size: 2em;
+  font-size: 2.2em;
   font-weight: bold;
   color: #333;
   text-align: center;
 }
-.card { 
-  background: #fff; 
-  border-radius: 15px; 
-  width: 300px; 
-  padding: 20px; 
-  margin: 15px; 
-  text-align: center; 
-  font-size: 1.5em; 
-  font-weight: bold; 
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.2); 
+
+/* --- カード（日めくり風） --- */
+.card {
+  background: #fff;
+  border-radius: 15px;
+  width: 300px;
+  padding: 20px;
+  margin: 15px;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
   position: relative;
+  line-height: 1.6;
 }
-.card span.number { color: red; }
-#adminLoginBtn { 
-  margin-top: auto; 
-  padding: 10px 20px; 
-  font-size: 1em; 
-  border: 2px solid #666; 
-  border-radius: 10px; 
-  background: #fff; 
+
+.card span.number {
+  color: red;
+  font-size: 2em;
+  display: block;
+  margin-top: 10px;
+}
+
+/* --- 管理者ログインボタン --- */
+#adminLoginBtn {
+  margin-top: 20px;
+  padding: 10px 25px;
+  font-size: 1em;
+  border: 2px solid #666;
+  border-radius: 10px;
+  background: #fff;
   cursor: pointer;
+  font-weight: bold;
+}
+#adminLoginBtn:hover {
+  background: #f0f0f0;
 }
 
 /* --- 管理者ページ --- */
 body.admin {
-  background: linear-gradient(135deg, #f0f4f8, #d9e2ec); 
-  display: flex;
-  justify-content: center; 
+  background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+  justify-content: center;
   align-items: center;
-  height: 100vh;
 }
+
 .login-card {
-  background: #fff; 
-  padding: 30px 40px; 
-  border-radius: 15px; 
-  box-shadow: 3px 3px 15px rgba(0,0,0,0.2); 
-  text-align: center; 
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 3px 3px 15px rgba(0,0,0,0.2);
+  text-align: center;
   width: 320px;
+  margin: auto;
 }
+
 .login-card h2 {
-  margin-bottom: 20px; 
-  color: #333; 
+  margin-bottom: 20px;
+  color: #333;
 }
+
 .login-card input[type="password"] {
-  width: 100%; 
-  padding: 10px; 
-  margin-bottom: 20px; 
-  border: 2px solid #ccc; 
-  border-radius: 8px; 
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
   font-size: 1em;
   box-sizing: border-box;
 }
+
 .login-card button {
-  padding: 10px 20px; 
-  font-size: 1em; 
-  border: 2px solid #666; 
-  border-radius: 10px; 
-  background: #fff; 
+  padding: 10px 20px;
+  font-size: 1em;
+  border: 2px solid #666;
+  border-radius: 10px;
+  background: #fff;
   cursor: pointer;
   width: 100%;
   font-weight: bold;
 }
+
 .login-card button:hover {
+  background: #f0f0f0;
+}
+
+/* --- 編集フォーム --- */
+#editor {
+  margin-top: 30px;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
+  width: 340px;
+}
+
+#editor h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+#editor form label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #555;
+}
+
+#editor form input[type="date"] {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  box-sizing: border-box;
+}
+
+#editor form button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 10px;
+  border: 2px solid #666;
+  background: #fff;
+  cursor: pointer;
+}
+
+#editor form button:hover {
   background: #f0f0f0;
 }
