@@ -1,13 +1,12 @@
 const PASSWORD_HASH = "4bb4b6cbb0528674d2d0969cdb4660e862043a28d818d00ec16c265cfec2a371";
 
-
-async function sha256(str){
+async function sha256(str) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf))
     .map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-const GITHUB_REPO = "inakt/countdown-site";
+const GITHUB_REPO = "inakt/countdown-site"; // 自分のリポジトリ
 
 // ログイン処理
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -22,6 +21,7 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   }
 });
 
+// data.json 読み込み
 async function loadData(){
   const res = await fetch('data.json?time='+Date.now(), { cache:"no-store" });
   const data = await res.json();
@@ -30,7 +30,7 @@ async function loadData(){
   document.getElementById('kyoutsuu').value = data.events.kyoutsuu.date;
 }
 
-// 送信 → GitHub Actions に通知
+// 送信 → GitHub Actions に repository_dispatch
 document.getElementById('dateForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const newData = {
@@ -41,12 +41,15 @@ document.getElementById('dateForm').addEventListener('submit', async e=>{
     }
   };
 
-  await fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
-    method:"POST",
-    headers:{
-      "Accept":"application/vnd.github.everest-preview+json"
-      // フロントにトークンは置かない
-    },
-    body: JSON.stringify({ event_type:"update-data", client_payload:{data:JSON.stringify(newData)}})
-  }).then(r=>alert(r.ok ? "保存成功" : "保存失敗"));
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
+      method: "POST",
+      headers: { "Accept":"application/vnd.github.everest-preview+json" },
+      body: JSON.stringify({ event_type:"update-data", client_payload:{data:JSON.stringify(newData)}})
+    });
+    alert(res.ok ? "保存成功" : "保存失敗");
+  } catch(err) {
+    console.error(err);
+    alert("保存失敗");
+  }
 });
