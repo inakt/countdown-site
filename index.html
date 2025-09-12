@@ -6,58 +6,58 @@
 <meta name="robots" content="noindex,nofollow">
 <title>入試カウントダウン</title>
 <link rel="stylesheet" href="styles.css">
-<link rel="manifest" href="manifest.json">
 </head>
 <body>
   <h1 class="title">入試カウントダウン</h1>
 
   <div class="card">
-    埼玉県公立高校入試まで<br>あと <span class="number" id="kouritsu">-</span>日
+    埼玉県公立高校入試まで<br>
+    あと <span class="number" id="kouritsu">-</span>日
+    <br>（<span class="date" id="kouritsuDate"></span>）
   </div>
   <div class="card">
-    埼玉県私立高校入試まで<br>あと <span class="number" id="shiritsu">-</span>日
+    埼玉県私立高校入試まで<br>
+    あと <span class="number" id="shiritsu">-</span>日
+    <br>（<span class="date" id="shiritsuDate"></span>）
   </div>
   <div class="card">
-    大学入学共通テストまで<br>あと <span class="number" id="kyoutsuu">-</span>日
+    大学入学共通テストまで<br>
+    あと <span class="number" id="kyoutsuu">-</span>日
+    <br>（<span class="date" id="kyoutsuuDate"></span>）
   </div>
-
-  <button id="adminLoginBtn">管理者ログイン</button>
 
 <script>
-const WORKER_URL = "https://ghadmintoken.inakt.workers.dev";
+const events = {
+  kouritsu: "2026-02-26",
+  shiritsu: "2026-01-22",
+  kyoutsuu: "2025-10-30"
+};
 
-async function loadData(){
-  try {
-    const res = await fetch(WORKER_URL + "?time=" + Date.now(), { cache: "no-store" });
-    const data = await res.json();
-    const now = new Date();
-    function diffDays(d){ return Math.max(Math.ceil((new Date(d)-now)/(1000*60*60*24)),0); }
-    document.getElementById('kouritsu').textContent = diffDays(data.events.kouritsu.date);
-    document.getElementById('shiritsu').textContent = diffDays(data.events.shiritsu.date);
-    document.getElementById('kyoutsuu').textContent = diffDays(data.events.kyoutsuu.date);
-  } catch(e){ console.error(e); }
+function diffDays(d){
+  const now = new Date();
+  const target = new Date(d);
+  return Math.max(Math.ceil((target - now)/(1000*60*60*24)),0);
 }
 
-// 初回読み込み
-loadData();
+// 初期表示
+document.getElementById('kouritsu').textContent = diffDays(events.kouritsu);
+document.getElementById('kouritsuDate').textContent = events.kouritsu;
+
+document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
+document.getElementById('shiritsuDate').textContent = events.shiritsu;
+
+document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
+document.getElementById('kyoutsuuDate').textContent = events.kyoutsuu;
 
 // 0:00:05 自動更新
 setInterval(()=>{
   const now = new Date();
   if(now.getHours()===0 && now.getMinutes()===0 && now.getSeconds()===5){
-    loadData();
+    document.getElementById('kouritsu').textContent = diffDays(events.kouritsu);
+    document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
+    document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
   }
-}, 60*1000);
-
-// 管理者ログインボタン
-document.getElementById('adminLoginBtn').addEventListener('click', ()=>{
-  window.location.href = "admin.html";
-});
-
-// PWA Service Worker
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(()=>console.log("SW登録成功")).catch(console.error);
-}
+}, 1000);
 </script>
 </body>
 </html>
