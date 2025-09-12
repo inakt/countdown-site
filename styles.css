@@ -28,7 +28,7 @@ body {
   box-shadow: 3px 3px 12px rgba(0,0,0,0.2); 
   position: relative;
 }
-.card .number { color: red; }
+.card span.number { color: red; }
 #adminLoginBtn { 
   margin-top: auto; 
   padding: 10px 20px; 
@@ -42,8 +42,10 @@ body {
 /* --- 管理者ページ --- */
 body.admin {
   background: linear-gradient(135deg, #f0f4f8, #d9e2ec); 
+  display: flex;
   justify-content: center; 
   align-items: center;
+  height: 100vh;
 }
 .login-card {
   background: #fff; 
@@ -52,7 +54,6 @@ body.admin {
   box-shadow: 3px 3px 15px rgba(0,0,0,0.2); 
   text-align: center; 
   width: 320px;
-  margin: auto;
 }
 .login-card h2 {
   margin-bottom: 20px; 
