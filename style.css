@@ -1,3 +1,4 @@
+/* --- 共通 --- */
 body { 
   font-family: sans-serif; 
   background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
@@ -36,4 +37,46 @@ body {
   border-radius: 10px; 
   background: #fff; 
   cursor: pointer; 
+}
+
+/* --- 管理者ページ --- */
+body.admin {
+  background: linear-gradient(135deg, #f0f4f8, #d9e2ec); 
+  justify-content: center; 
+  align-items: center;
+}
+.login-card {
+  background: #fff; 
+  padding: 30px 40px; 
+  border-radius: 15px; 
+  box-shadow: 3px 3px 15px rgba(0,0,0,0.2); 
+  text-align: center; 
+  width: 320px;
+  margin: auto;
+}
+.login-card h2 {
+  margin-bottom: 20px; 
+  color: #333; 
+}
+.login-card input[type="password"] {
+  width: 100%; 
+  padding: 10px; 
+  margin-bottom: 20px; 
+  border: 2px solid #ccc; 
+  border-radius: 8px; 
+  font-size: 1em;
+  box-sizing: border-box;
+}
+.login-card button {
+  padding: 10px 20px; 
+  font-size: 1em; 
+  border: 2px solid #666; 
+  border-radius: 10px; 
+  background: #fff; 
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+}
+.login-card button:hover {
+  background: #f0f0f0;
 }
