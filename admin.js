@@ -36,7 +36,7 @@ document.getElementById('dateForm').addEventListener('submit', async e=>{
     }
   };
 
-  const res = await fetch('https://ghadmintoken.inakt.workers.dev', {
+  const res = await fetch('https://ghadmintoken.inakt.workers.dev/', {
     method: "POST",
     headers: { "Content-Type":"application/json" },
     body: JSON.stringify({ password: document.getElementById('password').value, data: newData })
