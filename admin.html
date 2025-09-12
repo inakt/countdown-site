@@ -1,28 +1,86 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理者ログイン</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者ログイン</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin">
-  <div class="login-card" id="login">
-    <h2>管理者ログイン</h2>
-    <input type="password" id="password" placeholder="パスワード">
-    <button id="loginBtn">ログイン</button>
-  </div>
+<div class="login-card" id="login">
+  <h2>管理者ログイン</h2>
+  <input type="password" id="password" placeholder="パスワード">
+  <button id="loginBtn">ログイン</button>
+</div>
 
-  <div id="editor" style="display:none;">
-    <h2>日付編集</h2>
-    <form id="dateForm">
-      <label>埼玉県公立高校入試<input type="date" id="kouritsu"></label><br>
-      <label>埼玉県私立高校入試<input type="date" id="shiritsu"></label><br>
-      <label>大学入学共通テスト<input type="date" id="kyoutsuu"></label><br>
-      <button type="submit">保存</button>
-    </form>
-  </div>
+<div id="editor" style="display:none;">
+  <h2>日付編集</h2>
+  <form id="dateForm">
+    <label>埼玉県公立高校入試
+      <input type="date" id="kouritsu">
+    </label>
+    <label>埼玉県私立高校入試
+      <input type="date" id="shiritsu">
+    </label>
+    <label>大学入学共通テスト
+      <input type="date" id="kyoutsuu">
+    </label>
+    <button type="submit">保存</button>
+  </form>
+</div>
 
-  <script src="admin.js"></script>
+<script>
+const PASSWORD_HASH = "12d089aef6fc0919e6f1a5d1c92a5bc58fca9b2a81f07365000d8a1bfa1a0f7f"; // SHA-256(@sakakibara@)
+const WORKER_URL = "https://inakt-countdown-site.workers.dev"; // ←Cloudflare Worker の URL に置換
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const pw = document.getElementById('password').value;
+  const hash = await sha256(pw);
+  if(hash === PASSWORD_HASH){
+    document.getElementById('login').style.display='none';
+    document.getElementById('editor').style.display='block';
+    loadData();
+  } else {
+    alert('パスワードが違います');
+  }
+});
+
+async function loadData(){
+  try {
+    const res = await fetch(WORKER_URL + "?time="+Date.now(), { cache: "no-store" });
+    const data = await res.json();
+    document.getElementById('kouritsu').value = data.events.kouritsu.date;
+    document.getElementById('shiritsu').value = data.events.shiritsu.date;
+    document.getElementById('kyoutsuu').value = data.events.kyoutsuu.date;
+  } catch(e){ console.error(e); }
+}
+
+document.getElementById('dateForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const newData = {
+    events:{
+      kouritsu:{title:"埼玉県公立高校入試", date:document.getElementById('kouritsu').value},
+      shiritsu:{title:"埼玉県私立高校入試", date:document.getElementById('shiritsu').value},
+      kyoutsuu:{title:"大学入学共通テスト", date:document.getElementById('kyoutsuu').value}
+    }
+  };
+  try{
+    const res = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(newData)
+    });
+    alert(res.ok ? "保存成功" : "保存失敗");
+  }catch(e){
+    console.error(e);
+    alert("保存失敗");
+  }
+});
+</script>
 </body>
 </html>
