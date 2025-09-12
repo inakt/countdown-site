@@ -7,6 +7,16 @@
 <title>入試カウントダウン</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="manifest" href="manifest.json">
+<style>
+body { font-family: sans-serif; padding: 1rem; }
+h1.title { text-align: center; }
+.card { margin: 1rem 0; padding: 1rem; background: #f4f4f4; border-radius: 8px; text-align: center; }
+.number { color: red; font-weight: bold; font-size: 2rem; }
+
+#installBtn, #iosNotice { display: none; margin: 1rem auto; padding: 0.5rem 1rem; font-size: 1rem; border: none; border-radius: 5px; cursor: pointer; }
+#installBtn { background-color: #007bff; color: white; }
+#iosNotice { background-color: #ffeb3b; color: black; }
+</style>
 </head>
 <body>
   <h1 class="title">入試カウントダウン</h1>
@@ -23,7 +33,10 @@
     大学入学共通テストまで<br>あと <span class="number" id="kyoutsuu">-</span>日
     <div class="date" id="kyoutsuuDate">2025-10-30</div>
   </div>
-
+  
+<button id="installBtn">PWA をインストール</button>
+<div id="iosNotice">iOS をご利用の方は Safari の共有ボタンから「ホーム画面に追加」してください</div>
+  
 <script>
 const events = {
   kouritsu: "2026-02-26",
@@ -53,6 +66,30 @@ updateCountdown();
 // 1分ごとに更新（数字と日付を差分更新）
 setInterval(updateCountdown, 60*1000);
 
+// PWA インストール処理（Android）
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    console.log('User choice:', choiceResult.outcome);
+    deferredPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+  }
+});
+
+// iOS 判定
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if(isIOS){
+  document.getElementById('iosNotice').style.display = 'block';
+}  
+  
 // PWA Service Worker
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(()=>console.log("SW登録成功")).catch(console.error);
