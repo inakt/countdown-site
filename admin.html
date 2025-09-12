@@ -2,17 +2,29 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理者ログイン</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div class="login-container">
-    <h1>管理者ログイン</h1>
+<body class="admin">
+  <!-- ログインカード -->
+  <div class="login-card" id="login">
+    <h2>管理者ログイン</h2>
     <input type="password" id="password" placeholder="パスワード">
     <button id="loginBtn">ログイン</button>
   </div>
+
+  <!-- 編集フォーム -->
+  <div id="editor" style="display:none;">
+    <h2>日付編集</h2>
+    <form id="dateForm">
+      <label>埼玉県公立高校入試<input type="date" id="kouritsu"></label><br>
+      <label>埼玉県私立高校入試<input type="date" id="shiritsu"></label><br>
+      <label>大学入学共通テスト<input type="date" id="kyoutsuu"></label><br>
+      <button type="submit">保存</button>
+    </form>
+  </div>
+
   <script src="admin.js"></script>
 </body>
 </html>
