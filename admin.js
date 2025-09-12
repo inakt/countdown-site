@@ -1,4 +1,4 @@
-const PASSWORD_HASH = "12d089aef6fc0919e6f1a5d1c92a5bc58fca9b2a81f07365000d8a1bfa1a0f7f";
+const PASSWORD_HASH = "4bb4b6cbb0528674d2d0969cdb4660e862043a28d818d00ec16c265cfec2a371";
 const GITHUB_REPO = "inakt/countdown-site";
 
 async function sha256(str){
