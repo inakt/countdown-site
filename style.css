@@ -8,6 +8,13 @@ body {
   padding: 20px; 
   box-sizing: border-box;
 }
+.title {
+  margin-bottom: 30px;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
 .card { 
   background: #fff; 
   border-radius: 15px; 
