@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: main   # 開発ブランチをチェックアウト
+          ref: main
 
-      - name: Create gh-pages branch if not exists
+      - name: Create or switch gh-pages
         run: |
           git fetch origin gh-pages || git checkout -b gh-pages
           git checkout -B gh-pages
