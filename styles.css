@@ -1,31 +1,32 @@
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
+  font-family: sans-serif;
   background: #f0f0f0;
   margin: 0;
   padding: 20px;
+  text-align: center;
 }
 
 .title {
-  font-size: 2em;
+  font-size: 2rem;
   margin-bottom: 20px;
 }
 
 .card {
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   margin: 10px auto;
-  padding: 20px;
-  max-width: 300px;
+  padding: 15px;
+  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .number {
-  font-size: 1.5em;
   font-weight: bold;
+  font-size: 1.5rem;
 }
 
 .date {
-  font-size: 0.9em;
-  color: #666;
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 5px;
 }
