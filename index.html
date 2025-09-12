@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>入試カウントダウン</title>
   <link rel="stylesheet" href="styles.css">
@@ -12,30 +11,23 @@
   <h1 class="title">入試カウントダウン</h1>
 
   <div class="card" id="kouritsu">
-    <div class="event-title">埼玉県公立高校入試まで</div>
-    <div class="number">0</div>
+    埼玉県公立高校入試まで<br>あと <span class="number">0</span>日
   </div>
   <div class="card" id="shiritsu">
-    <div class="event-title">埼玉県私立高校入試まで</div>
-    <div class="number">0</div>
+    埼玉県私立高校入試まで<br>あと <span class="number">0</span>日
   </div>
   <div class="card" id="kyoutsuu">
-    <div class="event-title">大学入学共通テストまで</div>
-    <div class="number">0</div>
+    大学入学共通テストまで<br>あと <span class="number">0</span>日
   </div>
 
   <button id="adminLoginBtn">管理者ログイン</button>
 
   <script>
     async function loadData(){
-      const res = await fetch('data.json?time='+Date.now(), { cache: "no-store" });
+      const res = await fetch('data.json?time=' + Date.now(), {cache:'no-store'});
       const data = await res.json();
       const now = new Date();
-
-      function diffDays(d){ 
-        return Math.max(Math.ceil((new Date(d)-now)/(1000*60*60*24)),0); 
-      }
-
+      function diffDays(d){ return Math.max(Math.ceil((new Date(d)-now)/(1000*60*60*24)),0); }
       document.querySelector('#kouritsu .number').textContent = diffDays(data.events.kouritsu.date);
       document.querySelector('#shiritsu .number').textContent = diffDays(data.events.shiritsu.date);
       document.querySelector('#kyoutsuu .number').textContent = diffDays(data.events.kyoutsuu.date);
@@ -50,16 +42,16 @@
       if(now.getHours()===0 && now.getMinutes()===0 && now.getSeconds()===5){
         loadData();
       }
-    }, 1000);
+    }, 60*1000);
 
-    // 管理者ログインボタン押下
+    // 管理者ログインボタン押下で admin.html へ遷移
     document.getElementById('adminLoginBtn').addEventListener('click', ()=>{
       window.location.href = "admin.html";
     });
 
     // PWA Service Worker 登録
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(()=>console.log("SW登録成功"))
         .catch(console.error);
     }
