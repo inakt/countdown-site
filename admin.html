@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
 <title>管理者ログイン</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin">
+
 <div class="login-card" id="login">
   <h2>管理者ログイン</h2>
   <input type="password" id="password" placeholder="パスワード">
@@ -30,29 +32,31 @@
 </div>
 
 <script>
-const PASSWORD_HASH = "12d089aef6fc0919e6f1a5d1c92a5bc58fca9b2a81f07365000d8a1bfa1a0f7f"; // SHA-256(@sakakibara@)
-const WORKER_URL = "https://inakt-countdown-site.workers.dev"; // ←Cloudflare Worker の URL に置換
+const PASSWORD_HASH = "4bb4b6cbb0528674d2d0969cdb4660e862043a28d818d00ec16c265cfec2a371";
+const WORKER_URL = "https://ghadmintoken.inakt.workers.dev";
 
 async function sha256(str){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+// ログイン処理
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const pw = document.getElementById('password').value;
   const hash = await sha256(pw);
   if(hash === PASSWORD_HASH){
     document.getElementById('login').style.display='none';
     document.getElementById('editor').style.display='block';
-    loadData();
+    loadData().catch(console.error);
   } else {
     alert('パスワードが違います');
   }
 });
 
+// データ読み込み
 async function loadData(){
   try {
-    const res = await fetch(WORKER_URL + "?time="+Date.now(), { cache: "no-store" });
+    const res = await fetch(WORKER_URL + "?time=" + Date.now(), { cache: "no-store" });
     const data = await res.json();
     document.getElementById('kouritsu').value = data.events.kouritsu.date;
     document.getElementById('shiritsu').value = data.events.shiritsu.date;
@@ -60,6 +64,7 @@ async function loadData(){
   } catch(e){ console.error(e); }
 }
 
+// データ保存
 document.getElementById('dateForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const newData = {
@@ -71,16 +76,17 @@ document.getElementById('dateForm').addEventListener('submit', async e=>{
   };
   try{
     const res = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
       body: JSON.stringify(newData)
     });
     alert(res.ok ? "保存成功" : "保存失敗");
-  }catch(e){
+  } catch(e){
     console.error(e);
     alert("保存失敗");
   }
 });
 </script>
+
 </body>
 </html>
