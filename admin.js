@@ -3,6 +3,7 @@ const PASSWORD_HASH = "4bb4b6cbb0528674d2d0969cdb4660e862043a28d818d00ec16c265cf
 const WORKER_URL = "https://ghadmintoken.inakt.workers.dev"; // デプロイしたWorkerのURL
 
 
+// SHA-256 ハッシュ関数
 async function sha256(str){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -14,11 +15,11 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const hash = await sha256(pw);
 
   if(hash !== PASSWORD_HASH){
-    alert('パスワードが違います');
+    alert('パスワードが違います！');
     return;
   }
 
-  // ログイン成功 → フォームを admin.html 内に生成
+  // ログイン成功 → フォーム表示
   const editor = document.getElementById('editor');
   editor.innerHTML = `
     <div class="login-card">
@@ -35,9 +36,10 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   // 初期データ読み込み
   loadData();
 
-  // 送信処理
+  // フォーム送信
   document.getElementById('dateForm').addEventListener('submit', async e=>{
     e.preventDefault();
+
     const newData = {
       events:{
         kouritsu:{date: document.getElementById('kouritsu').value},
@@ -45,13 +47,15 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
         kyoutsuu:{date: document.getElementById('kyoutsuu').value}
       }
     };
-    try {
+
+    try{
       const res = await fetch(WORKER_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: newData })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({data: newData})
       });
-      alert(res.ok ? "保存成功" : "保存失敗");
+      const result = await res.json();
+      alert(result.ok ? "保存成功" : "保存失敗: " + result.status);
     } catch(err){
       alert("保存失敗: " + err.message);
     }
@@ -60,10 +64,8 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
 
 // データ読み込み関数
 async function loadData(){
-  const res = await fetch('data.json?time='+Date.now(), {cache:'no-store'});
+  const res = await fetch('data.json?time=' + Date.now(), {cache:'no-store'});
   const data = await res.json();
-
-  // フォームが生成されている場合のみ値をセット
   document.getElementById('kouritsu')?.setAttribute('value', data.events.kouritsu.date);
   document.getElementById('shiritsu')?.setAttribute('value', data.events.shiritsu.date);
   document.getElementById('kyoutsuu')?.setAttribute('value', data.events.kyoutsuu.date);
