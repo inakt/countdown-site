@@ -1,11 +1,19 @@
-const CACHE_NAME = "countdown-cache-v1";
-const URLS = ["index.html","manifest.json","sw.js","data.json"];
-
-self.addEventListener("install", e=>{
-  e.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(URLS)));
+self.addEventListener('install', event => {
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", e=>{
-  e.respondWith(caches.match(e.request).then(r=>r || fetch(e.request)));
+self.addEventListener('activate', event => {
+  self.clients.claim();
 });
 
+self.addEventListener('fetch', event => {
+  // data.json は常にネットワーク優先
+  if(event.request.url.endsWith('data.json')){
+    event.respondWith(fetch(event.request));
+  } else {
+    // それ以外はキャッシュ優先
+    event.respondWith(
+      caches.match(event.request).then(response => response || fetch(event.request))
+    );
+  }
+});
