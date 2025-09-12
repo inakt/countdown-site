@@ -4,33 +4,15 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理画面</title>
-<style>
-  body { font-family: sans-serif; padding: 20px; }
-  #editor { display: none; }
-  input { display: block; margin: 10px 0; padding: 5px; width: 250px;}
-  button { padding: 5px 10px; margin-top: 10px;}
-</style>
+<title>管理者ログイン</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div id="login">
+<body class="admin">
+<div class="login-card">
+  <h2>管理者ログイン</h2>
   <input type="password" id="password" placeholder="パスワード">
   <button id="loginBtn">ログイン</button>
 </div>
-
-<div id="editor">
-  <form id="dateForm">
-    <label>埼玉県公立高校入試</label>
-    <input type="date" id="kouritsu">
-    <label>埼玉県私立高校入試</label>
-    <input type="date" id="shiritsu">
-    <label>大学入学共通テスト</label>
-    <input type="date" id="kyoutsuu">
-    <button type="submit">保存</button>
-  </form>
-</div>
-
 <script src="admin.js"></script>
 </body>
 </html>
-
