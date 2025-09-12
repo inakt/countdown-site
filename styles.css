@@ -28,7 +28,10 @@ body {
 }
 
 .date {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #555;
   margin-top: 5px;
+}
+.label {
+  font-size: 2rem; /* 好きなサイズに変更 */
 }
