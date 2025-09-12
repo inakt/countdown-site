@@ -28,7 +28,7 @@ body {
   box-shadow: 3px 3px 12px rgba(0,0,0,0.2); 
   position: relative;
 }
-.card span.number { color: red; }
+.card .number { color: red; }
 #adminLoginBtn { 
   margin-top: auto; 
   padding: 10px 20px; 
@@ -36,7 +36,7 @@ body {
   border: 2px solid #666; 
   border-radius: 10px; 
   background: #fff; 
-  cursor: pointer; 
+  cursor: pointer;
 }
 
 /* --- 管理者ページ --- */
