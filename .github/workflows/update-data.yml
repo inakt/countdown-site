@@ -26,4 +26,4 @@ jobs:
           git commit -m "Update data.json via admin"
           git push origin gh-pages --force
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
