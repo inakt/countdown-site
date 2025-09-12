@@ -1,6 +1,5 @@
 const PASSWORD_HASH = "4bb4b6cbb0528674d2d0969cdb4660e862043a28d818d00ec16c265cfec2a371";
 
-
 async function sha256(str) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf))
@@ -8,7 +7,6 @@ async function sha256(str) {
 }
 
 const GITHUB_REPO = "inakt/countdown-site"; // 自分のリポジトリ
-const TOKEN = "GH_ADMIN_TOKEN"; // フロントにハードコーディングでも安全性を犠牲しないなら短期トークン推奨
 
 // ログイン処理
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -32,7 +30,7 @@ async function loadData(){
   document.getElementById('kyoutsuu').value = data.events.kyoutsuu.date;
 }
 
-// 送信 → GitHub API に repository_dispatch
+// 送信 → GitHub Actions workflow が受け取る
 document.getElementById('dateForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const newData = {
@@ -46,10 +44,7 @@ document.getElementById('dateForm').addEventListener('submit', async e=>{
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
       method: "POST",
-      headers: {
-        "Accept":"application/vnd.github.everest-preview+json",
-        "Authorization": "token " + TOKEN
-      },
+      headers: { "Accept":"application/vnd.github.everest-preview+json" },
       body: JSON.stringify({ event_type:"update-data", client_payload:{data:JSON.stringify(newData)}})
     });
     alert(res.ok ? "保存成功" : "保存失敗");
@@ -58,4 +53,5 @@ document.getElementById('dateForm').addEventListener('submit', async e=>{
     alert("保存失敗");
   }
 });
+
 
