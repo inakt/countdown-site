@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入試カウントダウン</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  body { font-family: sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  .card { background: #fff; border: 2px solid red; border-radius: 15px; width: 300px; padding: 20px; margin: 10px; text-align: center; color: red; font-weight: bold; font-size: 2em; box-shadow: 3px 3px 10px rgba(0,0,0,0.2);}
+</style>
+</head>
+<body>
+<div id="kouritsu" class="card"></div>
+<div id="shiritsu" class="card"></div>
+<div id="kyoutsuu" class="card"></div>
+
+<script>
+async function loadData(){
+  const res = await fetch('data.json?time='+Date.now(), { cache: "no-store" });
+  const data = await res.json();
+  const now = new Date();
+  function diffDays(d){ return Math.max(Math.ceil((new Date(d)-now)/(1000*60*60*24)),0); }
+  document.getElementById('kouritsu').textContent = diffDays(data.events.kouritsu.date);
+  document.getElementById('shiritsu').textContent = diffDays(data.events.shiritsu.date);
+  document.getElementById('kyoutsuu').textContent = diffDays(data.events.kyoutsuu.date);
+}
+
+// ページを開いた瞬間に最新データを反映
+loadData();
+
+// 0:00:05 に自動更新
+setInterval(()=>{
+  const now = new Date();
+  if(now.getHours()===0 && now.getMinutes()===0 && now.getSeconds()===5){
+    loadData();
+  }
+}, 60*1000);
+
+// PWA Service Worker 登録
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(()=>console.log("SW登録成功")).catch(console.error);
+}
+</script>
+</body>
+</html>
 
