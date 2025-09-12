@@ -42,9 +42,22 @@ const events = {
   kyoutsuu: "2026-01-17"
 };
 
-function diffDays(d) {
+function diffDays(dateStr) {
   const now = new Date();
-  return Math.max(Math.ceil((new Date(d) - now)/(1000*60*60*24)),0);
+
+  // 日本時間での「今日」のみを扱う
+  const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+
+  // JSTの0時にそろえる（時分秒を消す）
+  jstNow.setHours(0, 0, 0, 0);
+
+  // イベント日もJSTの日付で揃える
+  const eventDate = new Date(dateStr + "T00:00:00+09:00");
+
+  // 日付差分（ミリ秒 → 日数に変換、切り捨て）
+  const diff = Math.floor((eventDate - jstNow) / (1000 * 60 * 60 * 24));
+
+  return diff >= 0 ? diff : 0;
 }
 
 function updateCountdown() {
