@@ -6,30 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>入試カウントダウン</title>
 <link rel="manifest" href="manifest.json">
-<style>
-  body { font-family: sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  button { padding: 8px 12px; margin-bottom: 20px; font-size: 1em; cursor: pointer; }
-  .card { 
-    background: #fff; 
-    border: 2px solid red; 
-    border-radius: 15px; 
-    width: 300px; 
-    padding: 20px; 
-    margin: 10px; 
-    text-align: center; 
-    color: red; 
-    font-weight: bold; 
-    font-size: 1.5em; 
-    box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<button id="adminLoginBtn">管理者ログイン</button>
+<div class="card" id="kouritsu">埼玉県公立高校入試まであと <span class="number">0</span> 日</div>
+<div class="card" id="shiritsu">埼玉県私立高校入試まであと <span class="number">0</span> 日</div>
+<div class="card" id="kyoutsuu">大学入学共通テストまであと <span class="number">0</span> 日</div>
 
-<div class="card" id="kouritsu">埼玉県公立高校入試まであと 0 日</div>
-<div class="card" id="shiritsu">埼玉県私立高校入試まであと 0 日</div>
-<div class="card" id="kyoutsuu">大学入学共通テストまであと 0 日</div>
+<button id="adminLoginBtn">管理者ログイン</button>
 
 <script>
 async function loadData(){
@@ -37,15 +21,15 @@ async function loadData(){
   const data = await res.json();
   const now = new Date();
   function diffDays(d){ return Math.max(Math.ceil((new Date(d)-now)/(1000*60*60*24)),0); }
-  document.getElementById('kouritsu').textContent = `埼玉県公立高校入試まであと ${diffDays(data.events.kouritsu.date)} 日`;
-  document.getElementById('shiritsu').textContent = `埼玉県私立高校入試まであと ${diffDays(data.events.shiritsu.date)} 日`;
-  document.getElementById('kyoutsuu').textContent = `大学入学共通テストまであと ${diffDays(data.events.kyoutsuu.date)} 日`;
+  document.querySelector('#kouritsu .number').textContent = diffDays(data.events.kouritsu.date);
+  document.querySelector('#shiritsu .number').textContent = diffDays(data.events.shiritsu.date);
+  document.querySelector('#kyoutsuu .number').textContent = diffDays(data.events.kyoutsuu.date);
 }
 
-// ページを開いた瞬間に最新データを反映
+// 初回読み込み
 loadData();
 
-// 0:00:05 に自動更新
+// 0:00:05 自動更新
 setInterval(()=>{
   const now = new Date();
   if(now.getHours()===0 && now.getMinutes()===0 && now.getSeconds()===5){
