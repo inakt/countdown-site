@@ -8,11 +8,28 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="admin">
-<div class="login-card">
+
+<!-- ログイン画面 -->
+<div id="login" class="login-card">
   <h2>管理者ログイン</h2>
   <input type="password" id="password" placeholder="パスワード">
   <button id="loginBtn">ログイン</button>
 </div>
+
+<!-- 編集画面（ログイン後表示） -->
+<div id="editor" style="display:none;" class="login-card">
+  <h2>日付編集フォーム</h2>
+  <form id="dateForm">
+    <label>埼玉県公立高校入試</label>
+    <input type="date" id="kouritsu"><br><br>
+    <label>埼玉県私立高校入試</label>
+    <input type="date" id="shiritsu"><br><br>
+    <label>大学入学共通テスト</label>
+    <input type="date" id="kyoutsuu"><br><br>
+    <button type="submit">保存</button>
+  </form>
+</div>
+
 <script src="admin.js"></script>
 </body>
 </html>
