@@ -10,16 +10,7 @@
 <link rel="icon" href="favicon.png" type="image/png">
 <style>
 body { font-family: sans-serif; padding: 1rem; }
-
-#installBtn, #iosNotice {
-  display: none; 
-  margin: 1rem auto; 
-  padding: 0.5rem 1rem; 
-  font-size: 1rem; 
-  border: none; 
-  border-radius: 5px; 
-  cursor: pointer; 
-}
+#installBtn, #iosNotice { display: none; margin: 1rem auto; padding: 0.5rem 1rem; font-size: 1rem; border: none; border-radius: 5px; cursor: pointer; }
 #installBtn { background-color: #007bff; color: white; }
 #iosNotice { background-color: #ffeb3b; color: black; }
 </style>
@@ -27,116 +18,22 @@ body { font-family: sans-serif; padding: 1rem; }
 <body>
 <h1 class="title">入試カウントダウン</h1>
 
-<div id="countdown-container">
-  <div class="card">
-     <span class="label">埼玉県公立高校入試まで</span><br>あと <span class="number" id="kouritsu">-</span>日
-    <div class="date" id="kouritsuDate">2026-02-26</div>
-  </div>
-  <div class="card">
-     <span class="label">埼玉県私立高校入試まで</span><br>あと <span class="number" id="shiritsu">-</span>日
-    <div class="date" id="shiritsuDate">2026-01-21</div>
-  </div>
-  <div class="card">
-     <span class="label">大学入学共通テストまで</span><br>あと <span class="number" id="kyoutsuu">-</span>日
-    <div class="date" id="kyoutsuuDate">2026-01-17</div>
-  </div>
+<div class="card">
+  <span class="label">埼玉県公立高校入試まで</span><br>あと <span class="number" id="kouritsu">-</span>日
+  <div class="date" id="kouritsuDate"></div>
+</div>
+<div class="card">
+  <span class="label">埼玉県私立高校入試まで</span><br>あと <span class="number" id="shiritsu">-</span>日
+  <div class="date" id="shiritsuDate"></div>
+</div>
+<div class="card">
+  <span class="label">大学入学共通テストまで</span><br>あと <span class="number" id="kyoutsuu">-</span>日
+  <div class="date" id="kyoutsuuDate"></div>
 </div>
 
 <button id="installBtn">アプリをインストール</button>
 <div id="iosNotice">iOS をご利用の方は Safari の共有ボタンから「ホーム画面に追加」してください</div>
 
-<script>
-const events = {
-  kouritsu: "2026-02-26",
-  shiritsu: "2026-01-22",
-  kyoutsuu: "2026-01-17"
-};
-
-function diffDays(dateStr) {
-  const now = new Date();
-  const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
-  jstNow.setHours(0,0,0,0);
-  const eventDate = new Date(dateStr + "T00:00:00+09:00");
-  const diff = Math.floor((eventDate - jstNow)/(1000*60*60*24));
-  return diff >= 0 ? diff : 0;
-}
-
-function updateCountdown() {
-  document.getElementById('kouritsu').textContent = diffDays(events.kouritsu);
-  document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
-  document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
-
-  document.getElementById('kouritsuDate').textContent = events.kouritsu;
-  document.getElementById('shiritsuDate').textContent = events.shiritsu;
-  document.getElementById('kyoutsuuDate').textContent = events.kyoutsuu;
-}
-
-// 初回更新
-updateCountdown();
-
-// 1分ごとにカウントダウン更新
-setInterval(updateCountdown, 60*1000);
-
-// --- PWA インストール処理 ---
-function initPWA() {
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-  if(!installBtn) return;
-
-  installBtn.style.display = 'none';
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    }
-  });
-
-  const iosNotice = document.getElementById('iosNotice');
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
-    iosNotice.style.display = 'block';
-  }
-}
-
-// 初回 PWA 初期化
-initPWA();
-
-// --- 自動更新（30秒ごと） ---
-async function refreshCountdown() {
-  try {
-    // キャッシュバスター追加
-    const url = '/countdown-site/index.html?t=' + Date.now();
-    const res = await fetch(url, { cache:'no-store', credentials:'omit' });
-    const html = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html,'text/html');
-    const newContainer = doc.getElementById('countdown-container');
-    const oldContainer = document.getElementById('countdown-container');
-    if(newContainer && oldContainer){
-      oldContainer.innerHTML = newContainer.innerHTML;
-    }
-    updateCountdown();
-  } catch(err){
-    console.log('自動更新失敗', err);
-  }
-}
-
-// 30秒ごとに自動更新
-setInterval(refreshCountdown, 30000);
-
-// --- Service Worker 登録 ---
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js')
-    .then(()=>console.log('SW登録成功'))
-    .catch(console.error);
-}
-</script>
+<script src="index.js"></script>
 </body>
 </html>
