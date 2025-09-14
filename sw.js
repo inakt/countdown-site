@@ -27,24 +27,15 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// --- フェッチ時処理（ネットワーク優先 + オフライン対応） ---
+// --- フェッチ時処理（ネットワーク優先 + オフライン対応 + 404回避） ---
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    (async () => {
+  event.respondWith((async () => {
+    const requestURL = new URL(event.request.url);
+
+    // 静的ファイルはキャッシュ優先
+    if (urlsToCache.includes(requestURL.pathname)) {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
       try {
-        // ネットワーク優先、Cookieは送信しない
-        const networkResponse = await fetch(event.request, { cache: "no-store", credentials: "omit" });
-        // 成功したらキャッシュを更新
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(event.request, networkResponse.clone());
-        return networkResponse;
-      } catch (err) {
-        // ネットワーク失敗時はキャッシュから返す
-        const cachedResponse = await caches.match(event.request);
-        if(cachedResponse) return cachedResponse;
-        // キャッシュもなければエラー
-        return new Response('オフライン中です', { status: 503, statusText: 'Service Unavailable' });
-      }
-    })()
-  );
-});
+        const networkResponse = await fetch(event.request, { cache: 'no-store', credentials: 'omit' });
+        const cache = await caches.open(CACHE_NAM_
