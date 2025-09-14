@@ -10,8 +10,6 @@
 <link rel="icon" href="favicon.png" type="image/png">
 <style>
 body { font-family: sans-serif; padding: 1rem; }
-
-
 #installBtn, #iosNotice { display: none; margin: 1rem auto; padding: 0.5rem 1rem; font-size: 1rem; border: none; border-radius: 5px; cursor: pointer; }
 #installBtn { background-color: #007bff; color: white; }
 #iosNotice { background-color: #ffeb3b; color: black; }
@@ -43,22 +41,13 @@ const events = {
   kyoutsuu: "2026-01-17"
 };
 
+// --- カウントダウン処理 ---
 function diffDays(dateStr) {
   const now = new Date();
-
-  // 日本時間での「今日」のみを扱う
   const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
-
-  // JSTの0時にそろえる（時分秒を消す）
-  jstNow.setHours(0, 0, 0, 0);
-
-  // イベント日もJSTの日付で揃える
+  jstNow.setHours(0,0,0,0);
   const eventDate = new Date(dateStr + "T00:00:00+09:00");
-
-  // 日付差分（ミリ秒 → 日数に変換、切り捨て）
-  const diff = Math.floor((eventDate - jstNow) / (1000 * 60 * 60 * 24));
-
-  return diff >= 0 ? diff : 0;
+  return Math.max(0, Math.floor((eventDate - jstNow)/(1000*60*60*24)));
 }
 
 function updateCountdown() {
@@ -66,7 +55,6 @@ function updateCountdown() {
   document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
   document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
 
-  // HTMLの日付も差分更新（文字は固定）
   document.getElementById('kouritsuDate').textContent = events.kouritsu;
   document.getElementById('shiritsuDate').textContent = events.shiritsu;
   document.getElementById('kyoutsuuDate').textContent = events.kyoutsuu;
@@ -74,37 +62,62 @@ function updateCountdown() {
 
 // 初回読み込み
 updateCountdown();
-
-// 1分ごとに更新（数字と日付を差分更新）
+// 1分ごとに数字だけ更新
 setInterval(updateCountdown, 60*1000);
 
-// PWA インストール処理（Android）
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBtn').style.display = 'block';
-});
+// --- ページ全体自動更新 ---
+async function refreshPage() {
+  try {
+    const res = await fetch('/', { cache: 'no-store', credentials: 'omit' });
+    const html = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    document.body.innerHTML = doc.body.innerHTML;
 
-document.getElementById('installBtn').addEventListener('click', async () => {
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    const choiceResult = await deferredPrompt.userChoice;
-    console.log('User choice:', choiceResult.outcome);
-    deferredPrompt = null;
-    document.getElementById('installBtn').style.display = 'none';
+    updateCountdown();
+    initPWA();
+  } catch (err) {
+    console.log('自動更新失敗', err);
   }
-});
+}
+setInterval(refreshPage, 30000); // 30秒ごと
 
-// iOS 判定
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-if(isIOS){
-  document.getElementById('iosNotice').style.display = 'block';
-}  
-  
-// PWA Service Worker
+// --- PWA初期化 ---
+function initPWA() {
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+  if(!installBtn) return;
+
+  installBtn.style.display = 'none';
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    }
+  });
+
+  const iosNotice = document.getElementById('iosNotice');
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
+    iosNotice.style.display = 'block';
+  }
+}
+
+// 初回読み込み時にPWA初期化
+initPWA();
+
+// --- サービスワーカー登録 ---
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(()=>console.log("SW登録成功")).catch(console.error);
+  navigator.serviceWorker.register('sw.js')
+    .then(()=>console.log("SW登録成功"))
+    .catch(console.error);
 }
 </script>
 </body>
