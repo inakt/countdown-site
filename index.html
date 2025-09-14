@@ -116,7 +116,7 @@ async function refreshCountdown() {
     const res = await fetch(url, { cache:'no-store', credentials:'omit' });
     const html = await res.text();
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const doc = parser.parseFromString(html,'text/html');
     const newContainer = doc.getElementById('countdown-container');
     const oldContainer = document.getElementById('countdown-container');
     if(newContainer && oldContainer){
