@@ -112,7 +112,7 @@ initPWA();
 async function refreshCountdown() {
   try {
     // キャッシュバスター追加
-    const url = window.location.href + '?t=' + Date.now();
+    const url = '/countdown-site/index.html?t=' + Date.now();
     const res = await fetch(url, { cache:'no-store', credentials:'omit' });
     const html = await res.text();
     const parser = new DOMParser();
