@@ -35,87 +35,92 @@ body { font-family: sans-serif; padding: 1rem; }
 <div id="iosNotice">iOS をご利用の方は Safari の共有ボタンから「ホーム画面に追加」してください</div>
   
 <script>
+const base = '/countdown-site/'; // GitHub Pages リポジトリ名に対応
 const events = {
   kouritsu: "2026-02-26",
-  shiritsu: "2026-01-21",
+  shiritsu: "2026-01-22",
   kyoutsuu: "2026-01-17"
 };
 
-// --- カウントダウン処理 ---
-function diffDays(dateStr) {
+// カウントダウン
+function diffDays(dateStr){
   const now = new Date();
   const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
   jstNow.setHours(0,0,0,0);
-  const eventDate = new Date(dateStr + "T00:00:00+09:00");
+  const eventDate = new Date(dateStr+"T00:00:00+09:00");
   return Math.max(0, Math.floor((eventDate - jstNow)/(1000*60*60*24)));
 }
 
-function updateCountdown() {
-  document.getElementById('kouritsu').textContent = diffDays(events.kouritsu);
-  document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
-  document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
+function updateCountdown(){
+  const k = document.getElementById('kouritsu');
+  const s = document.getElementById('shiritsu');
+  const kDate = document.getElementById('kouritsuDate');
+  const sDate = document.getElementById('shiritsuDate');
+  const ky = document.getElementById('kyoutsuu');
+  const kyDate = document.getElementById('kyoutsuuDate');
 
-  document.getElementById('kouritsuDate').textContent = events.kouritsu;
-  document.getElementById('shiritsuDate').textContent = events.shiritsu;
-  document.getElementById('kyoutsuuDate').textContent = events.kyoutsuu;
+  if(!k) return; // まだbody置換中ならスキップ
+  k.textContent = diffDays(events.kouritsu);
+  s.textContent = diffDays(events.shiritsu);
+  ky.textContent = diffDays(events.kyoutsuu);
+
+  kDate.textContent = events.kouritsu;
+  sDate.textContent = events.shiritsu;
+  kyDate.textContent = events.kyoutsuu;
 }
 
-// 初回読み込み
+// 初回
 updateCountdown();
-// 1分ごとに数字だけ更新
+// 1分ごと
 setInterval(updateCountdown, 60*1000);
 
-// --- ページ全体自動更新 ---
-async function refreshPage() {
-  try {
-    const res = await fetch('/', { cache: 'no-store', credentials: 'omit' });
+// ページ全体自動更新（bodyのみ）
+async function refreshPage(){
+  try{
+    const res = await fetch(window.location.href, { cache:'no-store', credentials:'omit' });
     const html = await res.text();
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const doc = parser.parseFromString(html,'text/html');
     document.body.innerHTML = doc.body.innerHTML;
 
     updateCountdown();
     initPWA();
-  } catch (err) {
+  }catch(err){
     console.log('自動更新失敗', err);
   }
 }
-setInterval(refreshPage, 30000); // 30秒ごと
+setInterval(refreshPage, 30000);
 
-// --- PWA初期化 ---
-function initPWA() {
+// PWA 初期化
+function initPWA(){
   let deferredPrompt;
   const installBtn = document.getElementById('installBtn');
   if(!installBtn) return;
-
-  installBtn.style.display = 'none';
-  window.addEventListener('beforeinstallprompt', e => {
+  installBtn.style.display='none';
+  window.addEventListener('beforeinstallprompt', e=>{
     e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
+    deferredPrompt=e;
+    installBtn.style.display='block';
   });
-
-  installBtn.addEventListener('click', async () => {
+  installBtn.addEventListener('click', async ()=>{
     if(deferredPrompt){
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
+      deferredPrompt=null;
+      installBtn.style.display='none';
     }
   });
 
   const iosNotice = document.getElementById('iosNotice');
   if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
-    iosNotice.style.display = 'block';
+    iosNotice.style.display='block';
   }
 }
-
-// 初回読み込み時にPWA初期化
 initPWA();
 
-// --- サービスワーカー登録 ---
+// Service Worker 登録
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js')
+  navigator.serviceWorker.register(base+'sw.js')
     .then(()=>console.log("SW登録成功"))
     .catch(console.error);
 }
