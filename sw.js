@@ -29,6 +29,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   // 1分ごとにキャッシュ無視で最新取得
   event.respondWith(
-    fetch(event.request, { cache: "no-store" }).catch(()=> caches.match(event.request))
+    fetch(event.request, { cache: "no-store", credentials: "omit" })
+.catch(()=> caches.match(event.request))
   );
 });
