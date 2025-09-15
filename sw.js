@@ -1,4 +1,4 @@
-const CACHE_NAME = 'countdown-site-v1';
+const CACHE_NAME = 'countdown-site-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -14,19 +14,17 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // 新しい SW を即アクティブ化
 });
 
 // アクティブ化
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if(key !== CACHE_NAME) return caches.delete(key);
-      })
+      keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
     ))
   );
-  self.clients.claim();
+  self.clients.claim(); // 全クライアントに新しい SW を即適用
 });
 
 // fetch イベント（ネットワーク優先、オフラインはキャッシュ）
@@ -35,9 +33,12 @@ self.addEventListener('fetch', event => {
 
   // events.json はキャッシュせず常に最新取得
   if(url.pathname.endsWith('events.json')) {
-    event.respondWith(fetch(event.request, { cache:'no-store', credentials:'omit' }).catch(() => 
-      new Response(JSON.stringify({kouritsu:'-',shiritsu:'-',kyoutsuu:'-'}), {headers:{'Content-Type':'application/json'}})
-    ));
+    event.respondWith(
+      fetch(event.request, { cache:'no-store', credentials:'omit' })
+      .catch(() => new Response(JSON.stringify({kouritsu:'-',shiritsu:'-',kyoutsuu:'-'}), {
+        headers:{'Content-Type':'application/json'}
+      }))
+    );
     return;
   }
 
@@ -45,10 +46,11 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request, { cache:'no-store', credentials:'omit' })
       .then(res => {
+        // 正常レスポンスをキャッシュ
         const copy = res.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         return res;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request)) // オフライン時はキャッシュ利用
   );
 });
