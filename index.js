@@ -1,119 +1,98 @@
-const DB_NAME = 'countdown-db';
-const DB_STORE = 'events';
-let db;
-
+// =======================
 // IndexedDB 初期化
+// =======================
 function initDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if(!d.objectStoreNames.contains(DB_STORE)) {
-        d.createObjectStore(DB_STORE);
+    const request = indexedDB.open("CountdownDB", 1);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains("events")) {
+        db.createObjectStore("events", { keyPath: "id" });
       }
     };
-    req.onsuccess = e => { db = e.target.result; resolve(); };
-    req.onerror = e => reject(e);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
 }
 
-// データ保存
-function saveEvents(events) {
-  if(!db) return;
-  const tx = db.transaction(DB_STORE, 'readwrite');
-  const store = tx.objectStore(DB_STORE);
-  store.put(events, 'latest');
+async function saveEventsToDB(events) {
+  const db = await initDB();
+  const tx = db.transaction("events", "readwrite");
+  const store = tx.objectStore("events");
+  events.forEach((ev, idx) => {
+    store.put({ id: idx, ...ev });
+  });
+  return tx.complete;
 }
 
-// データ取得
-function loadEvents() {
-  return new Promise(resolve => {
-    if(!db) { resolve(null); return; }
-    const tx = db.transaction(DB_STORE, 'readonly');
-    const store = tx.objectStore(DB_STORE);
-    const req = store.get('latest');
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => resolve(null);
+async function loadEventsFromDB() {
+  const db = await initDB();
+  const tx = db.transaction("events", "readonly");
+  const store = tx.objectStore("events");
+  return new Promise((resolve) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve([]);
   });
 }
 
-// 日数計算
-function diffDays(dateStr) {
-  const now = new Date();
-  const jstNow = new Date(now.toLocaleString("en-US",{timeZone:"Asia/Tokyo"}));
-  jstNow.setHours(0,0,0,0);
-  const eventDate = new Date(dateStr+"T00:00:00+09:00");
-  const diff = Math.floor((eventDate - jstNow)/(1000*60*60*24));
-  return diff>=0 ? diff : 0;
-}
-
-// DOM 更新
+// =======================
+// カウントダウン表示
+// =======================
 function updateCountdown(events) {
-  if(!events) return;
-  document.getElementById('kouritsu').textContent = diffDays(events.kouritsu);
-  document.getElementById('shiritsu').textContent = diffDays(events.shiritsu);
-  document.getElementById('kyoutsuu').textContent = diffDays(events.kyoutsuu);
+  if (!events || events.length === 0) return;
 
-  document.getElementById('kouritsuDate').textContent = events.kouritsu;
-  document.getElementById('shiritsuDate').textContent = events.shiritsu;
-  document.getElementById('kyoutsuuDate').textContent = events.kyoutsuu;
+  const now = new Date();
+  const container = document.getElementById("countdown");
+  container.innerHTML = "";
+
+  events.forEach((ev) => {
+    const eventDate = new Date(ev.date);
+    const diff = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
+
+    const div = document.createElement("div");
+    div.textContent = `${ev.title} : ${diff >= 0 ? diff : 0} 日`;
+    container.appendChild(div);
+  });
 }
 
-// events.json を強制更新して反映
-async function refreshEvents() {
+// =======================
+// データ取得（ネット or IndexedDB）
+// =======================
+async function refreshEvents(force = false) {
   try {
-    const url = '/countdown-site/events.json?t=' + Date.now(); // キャッシュバスター
-    const res = await fetch(url, { cache:'no-store', credentials:'omit' });
-    const events = await res.json();
+    // キャッシュを避けるためにキャッシュバスター付与
+    const url = "events.json?t=" + Date.now();
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("ネットワークエラー");
+    const events = await response.json();
     updateCountdown(events);
-    saveEvents(events);
-  } catch(e) {
-    // オフライン時は IndexedDB から復元
-    const events = await loadEvents();
+    saveEventsToDB(events);
+  } catch (err) {
+    console.warn("ネット取得失敗 → IndexedDBから取得", err);
+    const events = await loadEventsFromDB();
     updateCountdown(events);
   }
 }
 
-// PWA 初期化
-let deferredPrompt;
-function initPWA() {
-  const installBtn = document.getElementById('installBtn');
-  if(!installBtn) return;
+// =======================
+// 初期ロード
+// =======================
+(async function () {
+  // まず IndexedDB のデータを表示
+  const cachedEvents = await loadEventsFromDB();
+  if (cachedEvents.length > 0) updateCountdown(cachedEvents);
 
-  installBtn.style.display = 'none';
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
+  // すぐに最新データ取得
+  await refreshEvents(true);
 
-  installBtn.addEventListener('click', async () => {
-    if(deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
+  // 30秒ごとに更新
+  setInterval(refreshEvents, 30 * 1000);
+
+  // アプリ復帰時に更新
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      refreshEvents(true);
     }
   });
-
-  const iosNotice = document.getElementById('iosNotice');
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
-    iosNotice.style.display = 'block';
-  }
-}
-
-// 初期化
-(async () => {
-  await initDB();
-  initPWA();
-  await refreshEvents();
-  // 30秒ごとに自動更新
-  setInterval(refreshEvents, 30*1000);
 })();
-
-// Service Worker 登録
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js')
-    .then(()=>console.log("SW登録成功"))
-    .catch(console.error);
-}
